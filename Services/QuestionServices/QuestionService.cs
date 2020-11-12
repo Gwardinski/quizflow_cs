@@ -1,5 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
+using QuizFlow.Dto.Question;
 using QuizFlow.Models;
 
 namespace QuizFlow.Services.QuestionServices {
@@ -11,18 +15,45 @@ namespace QuizFlow.Services.QuestionServices {
             new Question { id = 2, question = "q3", answer = "a3" }
         };
 
-    public List<Question> getAllQuestions() {
-      return questions;
+    private readonly IMapper _mapper;
+
+    public QuestionService(IMapper mapper) {
+      _mapper = mapper;
     }
 
-    public Question getQuestionById(int id) {
-      return questions.FirstOrDefault(q => q.id == id);
+    public async Task<ServiceResponse<List<QuestionDtoGet>>> getAllQuestions() {
+      ServiceResponse<List<QuestionDtoGet>> serviceResponse = new ServiceResponse<List<QuestionDtoGet>>();
+      serviceResponse.data = questions.Select(q => _mapper.Map<QuestionDtoGet>(q)).ToList();
+      return serviceResponse;
     }
 
-    public Question addQuestion(Question question) {
+    public async Task<ServiceResponse<QuestionDtoGet>> getQuestionById(int id) {
+      ServiceResponse<QuestionDtoGet> serviceResponse = new ServiceResponse<QuestionDtoGet>();
+      serviceResponse.data = _mapper.Map<QuestionDtoGet>(questions.FirstOrDefault(q => q.id == id));
+      return serviceResponse;
+    }
+
+    public async Task<ServiceResponse<QuestionDtoGet>> addQuestion(QuestionDtoAdd newQuestion) {
+      ServiceResponse<QuestionDtoGet> serviceResponse = new ServiceResponse<QuestionDtoGet>();
+      Question question = _mapper.Map<Question>(newQuestion);
+      question.id = questions.Max(q => q.id) + 1;
       questions.Add(question);
-      return question;
+      serviceResponse.data = _mapper.Map<QuestionDtoGet>(question);
+      return serviceResponse;
     }
 
+    public async Task<ServiceResponse<QuestionDtoGet>> editQuestion(QuestionDtoEdit editedQuestion) {
+      ServiceResponse<QuestionDtoGet> serviceResponse = new ServiceResponse<QuestionDtoGet>();
+      try {
+        Question question = questions.FirstOrDefault(q => q.id == editedQuestion.id);
+        question.question = editedQuestion.question;
+        question.answer = editedQuestion.answer;
+        serviceResponse.data = _mapper.Map<QuestionDtoGet>(question);
+      } catch (Exception e) {
+        serviceResponse.success = false;
+        serviceResponse.message = e.Message;
+      }
+      return serviceResponse;
+    }
   }
 }
