@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using QuizFlow.Data;
+using QuizFlow.Services.QuestionServices;
 
 namespace QuizFlow {
   public class Startup {
@@ -24,7 +24,7 @@ namespace QuizFlow {
     public void ConfigureServices(IServiceCollection services) {
       services.AddControllers();
 
-      services.AddScoped<IQuizFlowRepo, MockQuizFlowRepo>();
+      services.AddScoped<IQuestionService, QuestionService>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
