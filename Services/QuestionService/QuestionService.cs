@@ -25,8 +25,8 @@ namespace QuizFlow.Services.QuestionService {
 
     public async Task<ServiceResponse<List<QuestionDtoGet>>> getAllQuestions() {
       ServiceResponse<List<QuestionDtoGet>> serviceResponse = new ServiceResponse<List<QuestionDtoGet>>();
-      List<Question> dbQuestions = await _dbContext.Questions.ToListAsync();
-      serviceResponse.data = dbQuestions.Select(q => _mapper.Map<QuestionDtoGet>(q)).ToList();
+      List<Question> questions = await _dbContext.Questions.ToListAsync();
+      serviceResponse.data = questions.Select(q => _mapper.Map<QuestionDtoGet>(q)).ToList();
       return serviceResponse;
     }
 
@@ -39,18 +39,24 @@ namespace QuizFlow.Services.QuestionService {
 
     public async Task<ServiceResponse<List<QuestionDtoGet>>> getUserQuestions() {
       ServiceResponse<List<QuestionDtoGet>> serviceResponse = new ServiceResponse<List<QuestionDtoGet>>();
-      List<Question> dbQuestions = await _dbContext.Questions.Where(q => q.user.id == getUserId()).ToListAsync();
-      serviceResponse.data = dbQuestions.Select(q => _mapper.Map<QuestionDtoGet>(q)).ToList();
+      List<Question> questions = await _dbContext.Questions.Where(q => q.user.id == getUserId()).ToListAsync();
+      serviceResponse.data = questions.Select(q => _mapper.Map<QuestionDtoGet>(q)).ToList();
       return serviceResponse;
     }
 
     public async Task<ServiceResponse<QuestionDtoGet>> addQuestion(QuestionDtoAdd newQuestion) {
       ServiceResponse<QuestionDtoGet> serviceResponse = new ServiceResponse<QuestionDtoGet>();
       Question question = _mapper.Map<Question>(newQuestion);
+
       question.user = await _dbContext.Users.FirstOrDefaultAsync(u => u.id == getUserId());
+      question.createdAt = DateTime.Now;
+      question.lastUpdated = DateTime.Now;
+
       await _dbContext.Questions.AddAsync(question);
       await _dbContext.SaveChangesAsync();
-      serviceResponse.data = _mapper.Map<QuestionDtoGet>(question);
+
+      Question questionDb = await _dbContext.Questions.FirstOrDefaultAsync(q => q.id == question.id && q.user.id == getUserId());
+      serviceResponse.data = _mapper.Map<QuestionDtoGet>(questionDb);
       return serviceResponse;
     }
 
@@ -61,6 +67,7 @@ namespace QuizFlow.Services.QuestionService {
         if (question.user.id == getUserId()) {
           question.question = editedQuestion.question;
           question.answer = editedQuestion.answer;
+          question.lastUpdated = DateTime.Now;
           _dbContext.Questions.Update(question);
           await _dbContext.SaveChangesAsync();
           serviceResponse.data = _mapper.Map<QuestionDtoGet>(question);

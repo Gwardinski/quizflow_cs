@@ -32,8 +32,8 @@ namespace QuizFlow.Services.QuizService {
 
     public async Task<ServiceResponse<QuizDtoGet>> getQuizById(int id) {
       ServiceResponse<QuizDtoGet> serviceResponse = new ServiceResponse<QuizDtoGet>();
-      Quiz round = await _dbContext.Quizzes.FirstOrDefaultAsync(q => q.id == id && q.user.id == getUserId());
-      serviceResponse.data = _mapper.Map<QuizDtoGet>(round);
+      Quiz quiz = await _dbContext.Quizzes.FirstOrDefaultAsync(q => q.id == id && q.user.id == getUserId());
+      serviceResponse.data = _mapper.Map<QuizDtoGet>(quiz);
       return serviceResponse;
     }
 
@@ -46,31 +46,33 @@ namespace QuizFlow.Services.QuizService {
 
     public async Task<ServiceResponse<QuizDtoGet>> addQuiz(QuizDtoAdd newQuiz) {
       ServiceResponse<QuizDtoGet> serviceResponse = new ServiceResponse<QuizDtoGet>();
-      Quiz round = _mapper.Map<Quiz>(newQuiz);
+      Quiz quiz = _mapper.Map<Quiz>(newQuiz);
 
-      round.user = await _dbContext.Users.FirstOrDefaultAsync(u => u.id == getUserId());
-
-      await _dbContext.Quizzes.AddAsync(round);
+      quiz.user = await _dbContext.Users.FirstOrDefaultAsync(u => u.id == getUserId());
+      quiz.createdAt = DateTime.Now;
+      quiz.lastUpdated = DateTime.Now;
+      await _dbContext.Quizzes.AddAsync(quiz);
       await _dbContext.SaveChangesAsync();
-      serviceResponse.data = _mapper.Map<QuizDtoGet>(round);
+      serviceResponse.data = _mapper.Map<QuizDtoGet>(quiz);
       return serviceResponse;
     }
 
     public async Task<ServiceResponse<QuizDtoGet>> editQuiz(QuizDtoEdit editedQuiz) {
       ServiceResponse<QuizDtoGet> serviceResponse = new ServiceResponse<QuizDtoGet>();
       try {
-        Quiz round = await _dbContext.Quizzes
+        Quiz quiz = await _dbContext.Quizzes
           .Include(q => q.user)
           .FirstOrDefaultAsync(q => q.id == editedQuiz.id);
-        if (round.user.id == getUserId()) {
-          round.title = editedQuiz.title;
-          round.description = editedQuiz.description;
-          _dbContext.Quizzes.Update(round);
+        if (quiz.user.id == getUserId()) {
+          quiz.title = editedQuiz.title;
+          quiz.description = editedQuiz.description;
+          quiz.lastUpdated = DateTime.Now;
+          _dbContext.Quizzes.Update(quiz);
           await _dbContext.SaveChangesAsync();
-          serviceResponse.data = _mapper.Map<QuizDtoGet>(round);
+          serviceResponse.data = _mapper.Map<QuizDtoGet>(quiz);
         } else {
           serviceResponse.success = false;
-          serviceResponse.message = "User round not found";
+          serviceResponse.message = "User quiz not found";
         }
       } catch (Exception e) {
         serviceResponse.success = false;
@@ -82,14 +84,14 @@ namespace QuizFlow.Services.QuizService {
     public async Task<ServiceResponse<string>> deleteQuiz(int id) {
       ServiceResponse<string> serviceResponse = new ServiceResponse<string>();
       try {
-        Quiz round = await _dbContext.Quizzes.FirstOrDefaultAsync(q => q.id == id && q.user.id == getUserId());
-        if (round != null) {
-          _dbContext.Quizzes.Remove(round);
+        Quiz quiz = await _dbContext.Quizzes.FirstOrDefaultAsync(q => q.id == id && q.user.id == getUserId());
+        if (quiz != null) {
+          _dbContext.Quizzes.Remove(quiz);
           await _dbContext.SaveChangesAsync();
           serviceResponse.data = "success";
         } else {
           serviceResponse.success = false;
-          serviceResponse.message = "User round not found";
+          serviceResponse.message = "User quiz not found";
         }
       } catch (Exception e) {
         serviceResponse.success = false;

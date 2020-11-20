@@ -91,7 +91,7 @@ namespace QuizFlow.Data {
       SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
       SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor {
         Subject = new ClaimsIdentity(claims),
-        Expires = DateTime.Now.AddDays(1),
+        Expires = DateTime.Now.AddDays(10),
         SigningCredentials = creds
       };
       JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();

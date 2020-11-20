@@ -9,8 +9,8 @@ namespace QuizFlow.Dto.Quiz {
     public string imageURL { get; set; }
     public double totalPoints { get; set; }
     public bool isPublished { get; set; }
-    // public DateTime lastUpdated { get; set; }
-    // public DateTime createdAt { get; set; }
+    public DateTime lastUpdated { get; set; }
+    public DateTime createdAt { get; set; }
     // relational values
     public UserDtoGet user { get; set; }
   }

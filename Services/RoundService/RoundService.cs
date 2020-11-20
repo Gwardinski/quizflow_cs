@@ -49,6 +49,8 @@ namespace QuizFlow.Services.RoundService {
       Round round = _mapper.Map<Round>(newRound);
 
       round.user = await _dbContext.Users.FirstOrDefaultAsync(u => u.id == getUserId());
+      round.createdAt = DateTime.Now;
+      round.lastUpdated = DateTime.Now;
 
       await _dbContext.Rounds.AddAsync(round);
       await _dbContext.SaveChangesAsync();
@@ -65,6 +67,7 @@ namespace QuizFlow.Services.RoundService {
         if (round.user.id == getUserId()) {
           round.title = editedRound.title;
           round.description = editedRound.description;
+          round.lastUpdated = DateTime.Now;
           _dbContext.Rounds.Update(round);
           await _dbContext.SaveChangesAsync();
           serviceResponse.data = _mapper.Map<RoundDtoGet>(round);
