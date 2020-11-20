@@ -1,23 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using QuizFlow.Data;
 using QuizFlow.Services.QuestionService;
+using QuizFlow.Services.QuizService;
+using QuizFlow.Services.RoundService;
 
 namespace QuizFlow {
   public class Startup {
@@ -32,6 +27,8 @@ namespace QuizFlow {
       services.AddDbContext<DataContext>(x => x.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
       services.AddControllers();
       services.AddAutoMapper(typeof(Startup));
+      services.AddScoped<IQuizService, QuizService>();
+      services.AddScoped<IRoundService, RoundService>();
       services.AddScoped<IQuestionService, QuestionService>();
       services.AddScoped<IAuthRepository, AuthRepository>();
       services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {

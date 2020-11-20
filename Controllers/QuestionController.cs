@@ -21,8 +21,7 @@ namespace QuizFlow.Controllers {
       _service = service;
     }
 
-
-    [AllowAnonymous]
+    [Route("all")]
     [HttpGet]
     public async Task<IActionResult> getAllQuestions() {
       ServiceResponse<List<QuestionDtoGet>> res = await _service.getAllQuestions();
@@ -32,7 +31,6 @@ namespace QuizFlow.Controllers {
       return Ok(res);
     }
 
-    [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<IActionResult> getQuestionById(int id) {
       ServiceResponse<QuestionDtoGet> res = await _service.getQuestionById(id);
@@ -42,7 +40,6 @@ namespace QuizFlow.Controllers {
       return Ok(res);
     }
 
-    [Route("user")]
     [HttpGet]
     public async Task<IActionResult> getUserQuestions() {
       ServiceResponse<List<QuestionDtoGet>> res = await _service.getUserQuestions();

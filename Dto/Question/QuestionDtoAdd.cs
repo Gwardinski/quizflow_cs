@@ -10,7 +10,5 @@ namespace QuizFlow.Dto.Question {
     public string questionType { get; set; }
     public string imageURL { get; set; }
     public bool isPublished { get; set; }
-    // relational values
-    public int roundId { get; set; }
   }
 }

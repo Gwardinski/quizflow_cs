@@ -19,6 +19,7 @@ namespace QuizFlow.Controllers {
       _service = service;
     }
 
+    [Route("all")]
     [HttpGet]
     public async Task<IActionResult> getAllRounds() {
       ServiceResponse<List<RoundDtoGet>> res = await _service.getAllRounds();
@@ -37,7 +38,6 @@ namespace QuizFlow.Controllers {
       return Ok(res);
     }
 
-    [Route("user")]
     [HttpGet]
     public async Task<IActionResult> getUserRounds() {
       ServiceResponse<List<RoundDtoGet>> res = await _service.getUserRounds();

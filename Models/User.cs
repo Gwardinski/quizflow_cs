@@ -8,6 +8,8 @@ namespace QuizFlow.Models {
     public byte[] passwordSalt { get; set; }
 
     public List<Question> questions { get; set; }
+    public List<Round> rounds { get; set; }
+    public List<Quiz> quizzes { get; set; }
 
     public User(string username) {
       this.username = username;

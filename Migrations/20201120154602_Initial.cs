@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace QuizFlow.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -30,6 +30,14 @@ namespace QuizFlow.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     question = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     answer = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    difficulty = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    points = table.Column<double>(type: "float", nullable: false),
+                    category = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    questionType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    imageURL = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    isPublished = table.Column<bool>(type: "bit", nullable: false),
+                    lastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    createdAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     userid = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -44,6 +52,32 @@ namespace QuizFlow.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Quizzes",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    title = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    imageURL = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    totalPoints = table.Column<double>(type: "float", nullable: false),
+                    isPublished = table.Column<bool>(type: "bit", nullable: false),
+                    lastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    createdAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    userid = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Quizzes", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_Quizzes_Users_userid",
+                        column: x => x.userid,
+                        principalTable: "Users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Rounds",
                 columns: table => new
                 {
@@ -51,6 +85,11 @@ namespace QuizFlow.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     title = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    imageURL = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    totalPoints = table.Column<double>(type: "float", nullable: false),
+                    isPublished = table.Column<bool>(type: "bit", nullable: false),
+                    lastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    createdAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     userid = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -94,6 +133,11 @@ namespace QuizFlow.Migrations
                 column: "userid");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Quizzes_userid",
+                table: "Quizzes",
+                column: "userid");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RoundQuestions_questionId",
                 table: "RoundQuestions",
                 column: "questionId");
@@ -106,6 +150,9 @@ namespace QuizFlow.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Quizzes");
+
             migrationBuilder.DropTable(
                 name: "RoundQuestions");
 

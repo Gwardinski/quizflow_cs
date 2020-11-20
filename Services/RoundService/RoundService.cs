@@ -25,8 +25,8 @@ namespace QuizFlow.Services.RoundService {
 
     public async Task<ServiceResponse<List<RoundDtoGet>>> getAllRounds() {
       ServiceResponse<List<RoundDtoGet>> serviceResponse = new ServiceResponse<List<RoundDtoGet>>();
-      List<Round> dbRounds = await _dbContext.Rounds.ToListAsync();
-      serviceResponse.data = dbRounds.Select(q => _mapper.Map<RoundDtoGet>(q)).ToList();
+      List<Round> rounds = await _dbContext.Rounds.ToListAsync();
+      serviceResponse.data = rounds.Select(q => _mapper.Map<RoundDtoGet>(q)).ToList();
       return serviceResponse;
     }
 
@@ -39,8 +39,8 @@ namespace QuizFlow.Services.RoundService {
 
     public async Task<ServiceResponse<List<RoundDtoGet>>> getUserRounds() {
       ServiceResponse<List<RoundDtoGet>> serviceResponse = new ServiceResponse<List<RoundDtoGet>>();
-      List<Round> dbRounds = await _dbContext.Rounds.Where(q => q.user.id == getUserId()).ToListAsync();
-      serviceResponse.data = dbRounds.Select(q => _mapper.Map<RoundDtoGet>(q)).ToList();
+      List<Round> rounds = await _dbContext.Rounds.Where(q => q.user.id == getUserId()).ToListAsync();
+      serviceResponse.data = rounds.Select(q => _mapper.Map<RoundDtoGet>(q)).ToList();
       return serviceResponse;
     }
 
@@ -59,12 +59,12 @@ namespace QuizFlow.Services.RoundService {
     public async Task<ServiceResponse<RoundDtoGet>> editRound(RoundDtoEdit editedRound) {
       ServiceResponse<RoundDtoGet> serviceResponse = new ServiceResponse<RoundDtoGet>();
       try {
-        // Include() required for relational mapping, ignores by default
-        Round round = await _dbContext.Rounds.Include(q => q.user).FirstOrDefaultAsync(q => q.id == editedRound.id);
+        Round round = await _dbContext.Rounds
+          .Include(q => q.user)
+          .FirstOrDefaultAsync(q => q.id == editedRound.id);
         if (round.user.id == getUserId()) {
           round.title = editedRound.title;
           round.description = editedRound.description;
-          // must set all values manually or will change to default values
           _dbContext.Rounds.Update(round);
           await _dbContext.SaveChangesAsync();
           serviceResponse.data = _mapper.Map<RoundDtoGet>(round);
