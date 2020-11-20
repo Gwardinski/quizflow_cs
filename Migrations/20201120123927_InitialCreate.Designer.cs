@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QuizFlow.Data;
 
 namespace QuizFlow.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20201120123927_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,31 +31,7 @@ namespace QuizFlow.Migrations
                     b.Property<string>("answer")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("category")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("createdAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("difficulty")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("imageURL")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("isPublished")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("lastUpdated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<double>("points")
-                        .HasColumnType("float");
-
                     b.Property<string>("question")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("questionType")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("userid")
@@ -73,26 +51,11 @@ namespace QuizFlow.Migrations
                         .HasColumnType("int")
                         .UseIdentityColumn();
 
-                    b.Property<DateTime>("createdAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("imageURL")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("isPublished")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("lastUpdated")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("title")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("totalPoints")
-                        .HasColumnType("float");
 
                     b.Property<int?>("userid")
                         .HasColumnType("int");

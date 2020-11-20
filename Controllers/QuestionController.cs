@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -24,29 +25,40 @@ namespace QuizFlow.Controllers {
     [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> getAllQuestions() {
-      var questionItems = await _service.getAllQuestions();
-      return Ok(questionItems);
+      ServiceResponse<List<QuestionDtoGet>> res = await _service.getAllQuestions();
+      if (res.data == null) {
+        return NotFound(res);
+      }
+      return Ok(res);
     }
 
     [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<IActionResult> getQuestionById(int id) {
-      var questionItem = await _service.getQuestionById(id);
-      return Ok(questionItem);
+      ServiceResponse<QuestionDtoGet> res = await _service.getQuestionById(id);
+      if (res.data == null) {
+        return NotFound(res);
+      }
+      return Ok(res);
     }
 
     [Route("user")]
     [HttpGet]
     public async Task<IActionResult> getUserQuestions() {
-      int id = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
-      var questionItems = await _service.getUserQuestions(id);
-      return Ok(questionItems);
+      ServiceResponse<List<QuestionDtoGet>> res = await _service.getUserQuestions();
+      if (res.data == null) {
+        return NotFound(res);
+      }
+      return Ok(res);
     }
 
     [HttpPost]
     public async Task<IActionResult> addQuestion(QuestionDtoAdd question) {
-      var newQuestion = await _service.addQuestion(question);
-      return Ok(newQuestion);
+      ServiceResponse<QuestionDtoGet> res = await _service.addQuestion(question);
+      if (res.data == null) {
+        return NotFound(res);
+      }
+      return Ok(res);
     }
 
     [HttpPut]
