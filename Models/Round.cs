@@ -13,6 +13,7 @@ namespace QuizFlow.Models {
     public DateTime createdAt { get; set; }
     // relational values
     public User user { get; set; }
-    public List<RoundQuestion> roundQuestions { get; set; }
+    public List<int> questionIds { get; set; }
+    public List<Question> questions { get; set; }
   }
 }

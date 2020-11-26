@@ -32,7 +32,7 @@ namespace QuizFlow.Services.QuestionService {
 
     public async Task<ServiceResponse<QuestionDtoGet>> getQuestionById(int id) {
       ServiceResponse<QuestionDtoGet> serviceResponse = new ServiceResponse<QuestionDtoGet>();
-      Question question = await _dbContext.Questions.FirstOrDefaultAsync(q => q.id == id && q.user.id == getUserId());
+      Question question = await _dbContext.Questions.FirstOrDefaultAsync(q => q.id == id);
       serviceResponse.data = _mapper.Map<QuestionDtoGet>(question);
       return serviceResponse;
     }
@@ -55,6 +55,7 @@ namespace QuizFlow.Services.QuestionService {
       await _dbContext.Questions.AddAsync(question);
       await _dbContext.SaveChangesAsync();
 
+      // getting it back from db confirms it saved correctly
       Question questionDb = await _dbContext.Questions.FirstOrDefaultAsync(q => q.id == question.id && q.user.id == getUserId());
       serviceResponse.data = _mapper.Map<QuestionDtoGet>(questionDb);
       return serviceResponse;

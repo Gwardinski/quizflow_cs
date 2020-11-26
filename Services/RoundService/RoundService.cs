@@ -32,7 +32,7 @@ namespace QuizFlow.Services.RoundService {
 
     public async Task<ServiceResponse<RoundDtoGet>> getRoundById(int id) {
       ServiceResponse<RoundDtoGet> serviceResponse = new ServiceResponse<RoundDtoGet>();
-      Round round = await _dbContext.Rounds.FirstOrDefaultAsync(q => q.id == id && q.user.id == getUserId());
+      Round round = await _dbContext.Rounds.FirstOrDefaultAsync(q => q.id == id);
       serviceResponse.data = _mapper.Map<RoundDtoGet>(round);
       return serviceResponse;
     }

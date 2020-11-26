@@ -32,7 +32,7 @@ namespace QuizFlow.Services.QuizService {
 
     public async Task<ServiceResponse<QuizDtoGet>> getQuizById(int id) {
       ServiceResponse<QuizDtoGet> serviceResponse = new ServiceResponse<QuizDtoGet>();
-      Quiz quiz = await _dbContext.Quizzes.FirstOrDefaultAsync(q => q.id == id && q.user.id == getUserId());
+      Quiz quiz = await _dbContext.Quizzes.FirstOrDefaultAsync(q => q.id == id);
       serviceResponse.data = _mapper.Map<QuizDtoGet>(quiz);
       return serviceResponse;
     }

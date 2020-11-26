@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace QuizFlow.Models {
   public class Quiz {
@@ -12,5 +13,7 @@ namespace QuizFlow.Models {
     public DateTime createdAt { get; set; }
     // relational values
     public User user { get; set; }
+    public List<int> roundIds { get; set; }
+    public List<Round> rounds { get; set; }
   }
 }

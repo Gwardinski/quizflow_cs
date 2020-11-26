@@ -15,6 +15,7 @@ namespace QuizFlow.Dto.Round {
     public DateTime createdAt { get; set; }
     // relational values
     public UserDtoGet user { get; set; }
+    public List<int> questionIds { get; set; }
     public List<QuestionDtoGet> questions { get; set; }
   }
 }
