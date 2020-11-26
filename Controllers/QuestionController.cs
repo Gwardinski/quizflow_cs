@@ -10,7 +10,7 @@ using QuizFlow.Services.QuestionService;
 
 namespace QuizFlow.Controllers {
 
-  [Authorize]
+  // [Authorize]
   [ApiController]
   [Route("questions")]
   public class QuestionController : ControllerBase {

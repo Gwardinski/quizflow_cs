@@ -9,8 +9,14 @@ namespace QuizFlow.Data {
 
     public DbSet<User> Users { get; set; }
     public DbSet<Quiz> Quizzes { get; set; }
+    public DbSet<QuizRound> QuizRounds { get; set; }
     public DbSet<Round> Rounds { get; set; }
+    public DbSet<RoundQuestion> RoundQuestions { get; set; }
     public DbSet<Question> Questions { get; set; }
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder) {
+      modelBuilder.Entity<QuizRound>().HasKey(qr => new { qr.quizId, qr.roundId });
+      modelBuilder.Entity<RoundQuestion>().HasKey(rq => new { rq.roundId, rq.questionId });
+    }
   }
 }

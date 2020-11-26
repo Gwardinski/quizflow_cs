@@ -25,22 +25,32 @@ namespace QuizFlow.Services.RoundService {
 
     public async Task<ServiceResponse<List<RoundDtoGet>>> getAllRounds() {
       ServiceResponse<List<RoundDtoGet>> serviceResponse = new ServiceResponse<List<RoundDtoGet>>();
-      List<Round> rounds = await _dbContext.Rounds.ToListAsync();
-      serviceResponse.data = rounds.Select(q => _mapper.Map<RoundDtoGet>(q)).ToList();
+      List<Round> rounds = await _dbContext.Rounds
+        .ToListAsync();
+      serviceResponse.data = rounds
+        .Select(q => _mapper.Map<RoundDtoGet>(q))
+        .ToList();
       return serviceResponse;
     }
 
     public async Task<ServiceResponse<RoundDtoGet>> getRoundById(int id) {
       ServiceResponse<RoundDtoGet> serviceResponse = new ServiceResponse<RoundDtoGet>();
-      Round round = await _dbContext.Rounds.FirstOrDefaultAsync(q => q.id == id);
+      Round round = await _dbContext.Rounds
+        .Include(q => q.roundQuestions)
+        .ThenInclude(rq => rq.question)
+        .FirstOrDefaultAsync(q => q.id == id);
       serviceResponse.data = _mapper.Map<RoundDtoGet>(round);
       return serviceResponse;
     }
 
     public async Task<ServiceResponse<List<RoundDtoGet>>> getUserRounds() {
       ServiceResponse<List<RoundDtoGet>> serviceResponse = new ServiceResponse<List<RoundDtoGet>>();
-      List<Round> rounds = await _dbContext.Rounds.Where(q => q.user.id == getUserId()).ToListAsync();
-      serviceResponse.data = rounds.Select(q => _mapper.Map<RoundDtoGet>(q)).ToList();
+      List<Round> rounds = await _dbContext.Rounds
+        .Where(r => r.user.id == getUserId())
+        .ToListAsync();
+      serviceResponse.data = rounds
+        .Select(r => _mapper.Map<RoundDtoGet>(r))
+        .ToList();
       return serviceResponse;
     }
 
@@ -48,13 +58,19 @@ namespace QuizFlow.Services.RoundService {
       ServiceResponse<RoundDtoGet> serviceResponse = new ServiceResponse<RoundDtoGet>();
       Round round = _mapper.Map<Round>(newRound);
 
-      round.user = await _dbContext.Users.FirstOrDefaultAsync(u => u.id == getUserId());
+      round.user = await _dbContext.Users
+        .FirstOrDefaultAsync(u => u.id == getUserId());
       round.createdAt = DateTime.Now;
       round.lastUpdated = DateTime.Now;
 
       await _dbContext.Rounds.AddAsync(round);
       await _dbContext.SaveChangesAsync();
-      serviceResponse.data = _mapper.Map<RoundDtoGet>(round);
+
+      // getting it back from db confirms it saved correctly
+      Round roundDb = await _dbContext.Rounds
+        .Where(r => r.user.id == getUserId())
+        .FirstOrDefaultAsync(r => r.id == round.id);
+      serviceResponse.data = _mapper.Map<RoundDtoGet>(roundDb);
       return serviceResponse;
     }
 
@@ -62,9 +78,11 @@ namespace QuizFlow.Services.RoundService {
       ServiceResponse<RoundDtoGet> serviceResponse = new ServiceResponse<RoundDtoGet>();
       try {
         Round round = await _dbContext.Rounds
-          .Include(q => q.user)
+          .Where(q => q.user.id == getUserId())
+          .Include(q => q.roundQuestions)
+          .ThenInclude(qr => qr.question)
           .FirstOrDefaultAsync(q => q.id == editedRound.id);
-        if (round.user.id == getUserId()) {
+        if (round != null) {
           round.title = editedRound.title;
           round.description = editedRound.description;
           round.lastUpdated = DateTime.Now;
@@ -85,7 +103,9 @@ namespace QuizFlow.Services.RoundService {
     public async Task<ServiceResponse<string>> deleteRound(int id) {
       ServiceResponse<string> serviceResponse = new ServiceResponse<string>();
       try {
-        Round round = await _dbContext.Rounds.FirstOrDefaultAsync(q => q.id == id && q.user.id == getUserId());
+        Round round = await _dbContext.Rounds
+          .Where(r => r.user.id == getUserId())
+          .FirstOrDefaultAsync(r => r.id == id);
         if (round != null) {
           _dbContext.Rounds.Remove(round);
           await _dbContext.SaveChangesAsync();
@@ -104,7 +124,6 @@ namespace QuizFlow.Services.RoundService {
     private int getUserId() {
       return int.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
     }
-
 
   }
 }

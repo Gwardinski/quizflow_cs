@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using QuizFlow.Dto.Question;
+using QuizFlow.Dto.Quiz;
 using QuizFlow.Dto.User;
 
 namespace QuizFlow.Dto.Round {
@@ -16,6 +17,7 @@ namespace QuizFlow.Dto.Round {
     // relational values
     public UserDtoGet user { get; set; }
     public List<int> questionIds { get; set; }
+    public List<QuizDtoGet> quizzes { get; set; }
     public List<QuestionDtoGet> questions { get; set; }
   }
 }

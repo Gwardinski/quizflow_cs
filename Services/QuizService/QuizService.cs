@@ -25,22 +25,32 @@ namespace QuizFlow.Services.QuizService {
 
     public async Task<ServiceResponse<List<QuizDtoGet>>> getAllQuizzes() {
       ServiceResponse<List<QuizDtoGet>> serviceResponse = new ServiceResponse<List<QuizDtoGet>>();
-      List<Quiz> quizzes = await _dbContext.Quizzes.ToListAsync();
-      serviceResponse.data = quizzes.Select(q => _mapper.Map<QuizDtoGet>(q)).ToList();
+      List<Quiz> quizzes = await _dbContext.Quizzes
+        .ToListAsync();
+      serviceResponse.data = quizzes
+        .Select(q => _mapper.Map<QuizDtoGet>(q))
+        .ToList();
       return serviceResponse;
     }
 
     public async Task<ServiceResponse<QuizDtoGet>> getQuizById(int id) {
       ServiceResponse<QuizDtoGet> serviceResponse = new ServiceResponse<QuizDtoGet>();
-      Quiz quiz = await _dbContext.Quizzes.FirstOrDefaultAsync(q => q.id == id);
+      Quiz quiz = await _dbContext.Quizzes
+        .Include(q => q.quizRounds)
+        .ThenInclude(qr => qr.round)
+        .FirstOrDefaultAsync(q => q.id == id);
       serviceResponse.data = _mapper.Map<QuizDtoGet>(quiz);
       return serviceResponse;
     }
 
     public async Task<ServiceResponse<List<QuizDtoGet>>> getUserQuizzes() {
       ServiceResponse<List<QuizDtoGet>> serviceResponse = new ServiceResponse<List<QuizDtoGet>>();
-      List<Quiz> quizzes = await _dbContext.Quizzes.Where(q => q.user.id == getUserId()).ToListAsync();
-      serviceResponse.data = quizzes.Select(q => _mapper.Map<QuizDtoGet>(q)).ToList();
+      List<Quiz> quizzes = await _dbContext.Quizzes
+        .Where(q => q.user.id == getUserId())
+        .ToListAsync();
+      serviceResponse.data = quizzes
+        .Select(q => _mapper.Map<QuizDtoGet>(q))
+        .ToList();
       return serviceResponse;
     }
 
@@ -48,12 +58,19 @@ namespace QuizFlow.Services.QuizService {
       ServiceResponse<QuizDtoGet> serviceResponse = new ServiceResponse<QuizDtoGet>();
       Quiz quiz = _mapper.Map<Quiz>(newQuiz);
 
-      quiz.user = await _dbContext.Users.FirstOrDefaultAsync(u => u.id == getUserId());
+      quiz.user = await _dbContext.Users
+        .FirstOrDefaultAsync(u => u.id == getUserId());
       quiz.createdAt = DateTime.Now;
       quiz.lastUpdated = DateTime.Now;
+
       await _dbContext.Quizzes.AddAsync(quiz);
       await _dbContext.SaveChangesAsync();
-      serviceResponse.data = _mapper.Map<QuizDtoGet>(quiz);
+
+      // getting it back from db confirms it saved correctly
+      Quiz quizDb = await _dbContext.Quizzes
+        .Where(q => q.user.id == getUserId())
+        .FirstOrDefaultAsync(q => q.id == quiz.id);
+      serviceResponse.data = _mapper.Map<QuizDtoGet>(quizDb);
       return serviceResponse;
     }
 
@@ -61,9 +78,11 @@ namespace QuizFlow.Services.QuizService {
       ServiceResponse<QuizDtoGet> serviceResponse = new ServiceResponse<QuizDtoGet>();
       try {
         Quiz quiz = await _dbContext.Quizzes
-          .Include(q => q.user)
+          .Where(q => q.user.id == getUserId())
+          .Include(q => q.quizRounds)
+          .ThenInclude(qr => qr.round)
           .FirstOrDefaultAsync(q => q.id == editedQuiz.id);
-        if (quiz.user.id == getUserId()) {
+        if (quiz != null) {
           quiz.title = editedQuiz.title;
           quiz.description = editedQuiz.description;
           quiz.lastUpdated = DateTime.Now;
@@ -84,7 +103,9 @@ namespace QuizFlow.Services.QuizService {
     public async Task<ServiceResponse<string>> deleteQuiz(int id) {
       ServiceResponse<string> serviceResponse = new ServiceResponse<string>();
       try {
-        Quiz quiz = await _dbContext.Quizzes.FirstOrDefaultAsync(q => q.id == id && q.user.id == getUserId());
+        Quiz quiz = await _dbContext.Quizzes
+          .Where(q => q.user.id == getUserId())
+          .FirstOrDefaultAsync(q => q.id == id);
         if (quiz != null) {
           _dbContext.Quizzes.Remove(quiz);
           await _dbContext.SaveChangesAsync();
@@ -103,7 +124,6 @@ namespace QuizFlow.Services.QuizService {
     private int getUserId() {
       return int.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
     }
-
 
   }
 }

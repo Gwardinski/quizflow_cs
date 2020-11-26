@@ -8,7 +8,7 @@ using QuizFlow.Services.RoundService;
 
 namespace QuizFlow.Controllers {
 
-  [Authorize]
+  // [Authorize]
   [ApiController]
   [Route("rounds")]
   public class RoundController : ControllerBase {

@@ -25,22 +25,32 @@ namespace QuizFlow.Services.QuestionService {
 
     public async Task<ServiceResponse<List<QuestionDtoGet>>> getAllQuestions() {
       ServiceResponse<List<QuestionDtoGet>> serviceResponse = new ServiceResponse<List<QuestionDtoGet>>();
-      List<Question> questions = await _dbContext.Questions.ToListAsync();
-      serviceResponse.data = questions.Select(q => _mapper.Map<QuestionDtoGet>(q)).ToList();
+      List<Question> questions = await _dbContext.Questions
+        .ToListAsync();
+      serviceResponse.data = questions
+        .Select(q => _mapper.Map<QuestionDtoGet>(q))
+        .ToList();
       return serviceResponse;
     }
 
     public async Task<ServiceResponse<QuestionDtoGet>> getQuestionById(int id) {
       ServiceResponse<QuestionDtoGet> serviceResponse = new ServiceResponse<QuestionDtoGet>();
-      Question question = await _dbContext.Questions.FirstOrDefaultAsync(q => q.id == id);
+      Question question = await _dbContext.Questions
+        // .Include(q => q.roundQuestions)
+        // .ThenInclude(rq => rq.round)
+        .FirstOrDefaultAsync(q => q.id == id);
       serviceResponse.data = _mapper.Map<QuestionDtoGet>(question);
       return serviceResponse;
     }
 
     public async Task<ServiceResponse<List<QuestionDtoGet>>> getUserQuestions() {
       ServiceResponse<List<QuestionDtoGet>> serviceResponse = new ServiceResponse<List<QuestionDtoGet>>();
-      List<Question> questions = await _dbContext.Questions.Where(q => q.user.id == getUserId()).ToListAsync();
-      serviceResponse.data = questions.Select(q => _mapper.Map<QuestionDtoGet>(q)).ToList();
+      List<Question> questions = await _dbContext.Questions
+        .Where(q => q.user.id == getUserId())
+        .ToListAsync();
+      serviceResponse.data = questions
+        .Select(q => _mapper.Map<QuestionDtoGet>(q))
+        .ToList();
       return serviceResponse;
     }
 
@@ -48,7 +58,8 @@ namespace QuizFlow.Services.QuestionService {
       ServiceResponse<QuestionDtoGet> serviceResponse = new ServiceResponse<QuestionDtoGet>();
       Question question = _mapper.Map<Question>(newQuestion);
 
-      question.user = await _dbContext.Users.FirstOrDefaultAsync(u => u.id == getUserId());
+      question.user = await _dbContext.Users
+        .FirstOrDefaultAsync(u => u.id == getUserId());
       question.createdAt = DateTime.Now;
       question.lastUpdated = DateTime.Now;
 
@@ -56,7 +67,9 @@ namespace QuizFlow.Services.QuestionService {
       await _dbContext.SaveChangesAsync();
 
       // getting it back from db confirms it saved correctly
-      Question questionDb = await _dbContext.Questions.FirstOrDefaultAsync(q => q.id == question.id && q.user.id == getUserId());
+      Question questionDb = await _dbContext.Questions
+        .Where(q => q.user.id == getUserId())
+        .FirstOrDefaultAsync(q => q.id == question.id);
       serviceResponse.data = _mapper.Map<QuestionDtoGet>(questionDb);
       return serviceResponse;
     }
@@ -64,7 +77,9 @@ namespace QuizFlow.Services.QuestionService {
     public async Task<ServiceResponse<QuestionDtoGet>> editQuestion(QuestionDtoEdit editedQuestion) {
       ServiceResponse<QuestionDtoGet> serviceResponse = new ServiceResponse<QuestionDtoGet>();
       try {
-        Question question = await _dbContext.Questions.Include(q => q.user).FirstOrDefaultAsync(q => q.id == editedQuestion.id);
+        Question question = await _dbContext.Questions
+          .Include(q => q.user)
+          .FirstOrDefaultAsync(q => q.id == editedQuestion.id);
         if (question.user.id == getUserId()) {
           question.question = editedQuestion.question;
           question.answer = editedQuestion.answer;
@@ -86,7 +101,9 @@ namespace QuizFlow.Services.QuestionService {
     public async Task<ServiceResponse<string>> deleteQuestion(int id) {
       ServiceResponse<string> serviceResponse = new ServiceResponse<string>();
       try {
-        Question question = await _dbContext.Questions.FirstOrDefaultAsync(q => q.id == id && q.user.id == getUserId());
+        Question question = await _dbContext.Questions
+          .Where(q => q.user.id == getUserId())
+          .FirstOrDefaultAsync(q => q.id == id);
         if (question != null) {
           _dbContext.Questions.Remove(question);
           await _dbContext.SaveChangesAsync();
