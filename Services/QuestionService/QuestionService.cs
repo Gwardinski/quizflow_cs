@@ -36,8 +36,7 @@ namespace QuizFlow.Services.QuestionService {
     public async Task<ServiceResponse<QuestionDtoGet>> getQuestionById(int id) {
       ServiceResponse<QuestionDtoGet> serviceResponse = new ServiceResponse<QuestionDtoGet>();
       Question question = await _dbContext.Questions
-        // .Include(q => q.roundQuestions)
-        // .ThenInclude(rq => rq.round)
+        // .Include(q => q.rounds)
         .FirstOrDefaultAsync(q => q.id == id);
       serviceResponse.data = _mapper.Map<QuestionDtoGet>(question);
       return serviceResponse;

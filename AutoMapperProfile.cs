@@ -11,12 +11,10 @@ namespace QuizFlow {
     public AutoMapperProfile() {
       CreateMap<User, UserDtoGet>();
 
-      CreateMap<Quiz, QuizDtoGet>()
-        .ForMember(dto => dto.rounds, q => q.MapFrom(q => q.quizRounds.Select(qr => qr.round)));
+      CreateMap<Quiz, QuizDtoGet>();
       CreateMap<QuizDtoAdd, Quiz>();
 
-      CreateMap<Round, RoundDtoGet>()
-        .ForMember(dto => dto.questions, r => r.MapFrom(r => r.roundQuestions.Select(rq => rq.question)));
+      CreateMap<Round, RoundDtoGet>();
       CreateMap<RoundDtoAdd, Round>();
 
       CreateMap<Question, QuestionDtoGet>();

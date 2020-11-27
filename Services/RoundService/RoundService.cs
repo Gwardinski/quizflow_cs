@@ -36,8 +36,7 @@ namespace QuizFlow.Services.RoundService {
     public async Task<ServiceResponse<RoundDtoGet>> getRoundById(int id) {
       ServiceResponse<RoundDtoGet> serviceResponse = new ServiceResponse<RoundDtoGet>();
       Round round = await _dbContext.Rounds
-        .Include(q => q.roundQuestions)
-        .ThenInclude(rq => rq.question)
+        .Include(q => q.questions)
         .FirstOrDefaultAsync(q => q.id == id);
       serviceResponse.data = _mapper.Map<RoundDtoGet>(round);
       return serviceResponse;
@@ -79,8 +78,7 @@ namespace QuizFlow.Services.RoundService {
       try {
         Round round = await _dbContext.Rounds
           .Where(q => q.user.id == getUserId())
-          .Include(q => q.roundQuestions)
-          .ThenInclude(qr => qr.question)
+          .Include(q => q.questions)
           .FirstOrDefaultAsync(q => q.id == editedRound.id);
         if (round != null) {
           round.title = editedRound.title;

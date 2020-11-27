@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace QuizFlow.Models {
   public class Question {
+    [Key]
     public int id { get; set; }
+    [Required]
     public string question { get; set; }
+    [Required]
     public string answer { get; set; }
     public string difficulty { get; set; }
     public double points { get; set; }
@@ -16,6 +20,6 @@ namespace QuizFlow.Models {
     public DateTime createdAt { get; set; }
     // relational values
     public User user { get; set; }
-    public List<RoundQuestion> roundQuestions { get; set; }
+    public List<Round> rounds { get; set; }
   }
 }

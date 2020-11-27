@@ -10,7 +10,7 @@ using QuizFlow.Data;
 namespace QuizFlow.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20201126131847_Initial")]
+    [Migration("20201127155759_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,6 +21,21 @@ namespace QuizFlow.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.0");
 
+            modelBuilder.Entity("QuestionRound", b =>
+                {
+                    b.Property<int>("questionsid")
+                        .HasColumnType("int");
+
+                    b.Property<int>("roundsid")
+                        .HasColumnType("int");
+
+                    b.HasKey("questionsid", "roundsid");
+
+                    b.HasIndex("roundsid");
+
+                    b.ToTable("QuestionRound");
+                });
+
             modelBuilder.Entity("QuizFlow.Models.Question", b =>
                 {
                     b.Property<int>("id")
@@ -29,6 +44,7 @@ namespace QuizFlow.Migrations
                         .UseIdentityColumn();
 
                     b.Property<string>("answer")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("category")
@@ -53,6 +69,7 @@ namespace QuizFlow.Migrations
                         .HasColumnType("float");
 
                     b.Property<string>("question")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("questionType")
@@ -91,6 +108,7 @@ namespace QuizFlow.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("title")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("totalPoints")
@@ -104,21 +122,6 @@ namespace QuizFlow.Migrations
                     b.HasIndex("userid");
 
                     b.ToTable("Quizzes");
-                });
-
-            modelBuilder.Entity("QuizFlow.Models.QuizRound", b =>
-                {
-                    b.Property<int>("quizId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("roundId")
-                        .HasColumnType("int");
-
-                    b.HasKey("quizId", "roundId");
-
-                    b.HasIndex("roundId");
-
-                    b.ToTable("QuizRounds");
                 });
 
             modelBuilder.Entity("QuizFlow.Models.Round", b =>
@@ -144,6 +147,7 @@ namespace QuizFlow.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("title")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("totalPoints")
@@ -157,21 +161,6 @@ namespace QuizFlow.Migrations
                     b.HasIndex("userid");
 
                     b.ToTable("Rounds");
-                });
-
-            modelBuilder.Entity("QuizFlow.Models.RoundQuestion", b =>
-                {
-                    b.Property<int>("roundId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("questionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("roundId", "questionId");
-
-                    b.HasIndex("questionId");
-
-                    b.ToTable("RoundQuestions");
                 });
 
             modelBuilder.Entity("QuizFlow.Models.User", b =>
@@ -195,6 +184,36 @@ namespace QuizFlow.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("QuizRound", b =>
+                {
+                    b.Property<int>("quizzesid")
+                        .HasColumnType("int");
+
+                    b.Property<int>("roundsid")
+                        .HasColumnType("int");
+
+                    b.HasKey("quizzesid", "roundsid");
+
+                    b.HasIndex("roundsid");
+
+                    b.ToTable("QuizRound");
+                });
+
+            modelBuilder.Entity("QuestionRound", b =>
+                {
+                    b.HasOne("QuizFlow.Models.Question", null)
+                        .WithMany()
+                        .HasForeignKey("questionsid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QuizFlow.Models.Round", null)
+                        .WithMany()
+                        .HasForeignKey("roundsid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("QuizFlow.Models.Question", b =>
                 {
                     b.HasOne("QuizFlow.Models.User", "user")
@@ -213,25 +232,6 @@ namespace QuizFlow.Migrations
                     b.Navigation("user");
                 });
 
-            modelBuilder.Entity("QuizFlow.Models.QuizRound", b =>
-                {
-                    b.HasOne("QuizFlow.Models.Quiz", "quiz")
-                        .WithMany("quizRounds")
-                        .HasForeignKey("quizId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("QuizFlow.Models.Round", "round")
-                        .WithMany("quizRounds")
-                        .HasForeignKey("roundId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("quiz");
-
-                    b.Navigation("round");
-                });
-
             modelBuilder.Entity("QuizFlow.Models.Round", b =>
                 {
                     b.HasOne("QuizFlow.Models.User", "user")
@@ -241,40 +241,19 @@ namespace QuizFlow.Migrations
                     b.Navigation("user");
                 });
 
-            modelBuilder.Entity("QuizFlow.Models.RoundQuestion", b =>
+            modelBuilder.Entity("QuizRound", b =>
                 {
-                    b.HasOne("QuizFlow.Models.Question", "question")
-                        .WithMany("roundQuestions")
-                        .HasForeignKey("questionId")
+                    b.HasOne("QuizFlow.Models.Quiz", null)
+                        .WithMany()
+                        .HasForeignKey("quizzesid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("QuizFlow.Models.Round", "round")
-                        .WithMany("roundQuestions")
-                        .HasForeignKey("roundId")
+                    b.HasOne("QuizFlow.Models.Round", null)
+                        .WithMany()
+                        .HasForeignKey("roundsid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("question");
-
-                    b.Navigation("round");
-                });
-
-            modelBuilder.Entity("QuizFlow.Models.Question", b =>
-                {
-                    b.Navigation("roundQuestions");
-                });
-
-            modelBuilder.Entity("QuizFlow.Models.Quiz", b =>
-                {
-                    b.Navigation("quizRounds");
-                });
-
-            modelBuilder.Entity("QuizFlow.Models.Round", b =>
-                {
-                    b.Navigation("quizRounds");
-
-                    b.Navigation("roundQuestions");
                 });
 
             modelBuilder.Entity("QuizFlow.Models.User", b =>

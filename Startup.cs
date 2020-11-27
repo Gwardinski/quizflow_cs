@@ -11,9 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using QuizFlow.Data;
 using QuizFlow.Services.QuestionService;
-using QuizFlow.Services.QuizRoundService;
 using QuizFlow.Services.QuizService;
-using QuizFlow.Services.RoundQuestionService;
 using QuizFlow.Services.RoundService;
 
 namespace QuizFlow {
@@ -29,11 +27,13 @@ namespace QuizFlow {
       services.AddDbContext<DataContext>(x => x.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
       services.AddControllers();
       services.AddAutoMapper(typeof(Startup));
+      // services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+      services.AddControllers().AddNewtonsoftJson(options =>
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+      );
       services.AddScoped<IQuizService, QuizService>();
-      services.AddScoped<IQuizRoundService, QuizRoundService>();
       services.AddScoped<IRoundService, RoundService>();
       services.AddScoped<IQuestionService, QuestionService>();
-      services.AddScoped<IRoundQuestionService, RoundQuestionService>();
       services.AddScoped<IAuthRepository, AuthRepository>();
       services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
         options.TokenValidationParameters = new TokenValidationParameters {

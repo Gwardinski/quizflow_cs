@@ -36,9 +36,9 @@ namespace QuizFlow.Services.QuizService {
     public async Task<ServiceResponse<QuizDtoGet>> getQuizById(int id) {
       ServiceResponse<QuizDtoGet> serviceResponse = new ServiceResponse<QuizDtoGet>();
       Quiz quiz = await _dbContext.Quizzes
-        .Include(q => q.quizRounds)
-        .ThenInclude(qr => qr.round)
+        .Include(q => q.rounds)
         .FirstOrDefaultAsync(q => q.id == id);
+      Console.WriteLine(quiz);
       serviceResponse.data = _mapper.Map<QuizDtoGet>(quiz);
       return serviceResponse;
     }
@@ -46,6 +46,7 @@ namespace QuizFlow.Services.QuizService {
     public async Task<ServiceResponse<List<QuizDtoGet>>> getUserQuizzes() {
       ServiceResponse<List<QuizDtoGet>> serviceResponse = new ServiceResponse<List<QuizDtoGet>>();
       List<Quiz> quizzes = await _dbContext.Quizzes
+        .Include(q => q.rounds)
         .Where(q => q.user.id == getUserId())
         .ToListAsync();
       serviceResponse.data = quizzes
@@ -79,8 +80,7 @@ namespace QuizFlow.Services.QuizService {
       try {
         Quiz quiz = await _dbContext.Quizzes
           .Where(q => q.user.id == getUserId())
-          .Include(q => q.quizRounds)
-          .ThenInclude(qr => qr.round)
+          .Include(q => q.rounds)
           .FirstOrDefaultAsync(q => q.id == editedQuiz.id);
         if (quiz != null) {
           quiz.title = editedQuiz.title;
