@@ -33,5 +33,14 @@ namespace QuizFlow.Controllers {
       }
       return Ok(res);
     }
+
+    [HttpPost("sanity")]
+    public async Task<IActionResult> sanity(UserDtoLogin request) {
+      ServiceResponse<string> res = new ServiceResponse<string>();
+      res.success = true;
+      res.data = "hello";
+      res.message = "hello there";
+      return Ok(res);
+    }
   }
 }
