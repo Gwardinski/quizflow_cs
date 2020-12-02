@@ -4,58 +4,87 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using QuizFlow.Dto.User;
 using QuizFlow.Models;
 
 namespace QuizFlow.Data {
   public class AuthRepository : IAuthRepository {
 
-    public AuthRepository(DataContext context, IConfiguration configuation) {
+    public AuthRepository(IMapper mapper, DataContext context, IConfiguration configuation) {
       _configuation = configuation;
       _context = context;
+      _mapper = mapper;
     }
 
+    private readonly IMapper _mapper;
     private readonly DataContext _context;
     private readonly IConfiguration _configuation;
 
-    public async Task<ServiceResponse<int>> register(string username, string password) {
+    public async Task<ServiceResponse<int>> register(UserDtoRegister userDto) {
 
       ServiceResponse<int> res = new ServiceResponse<int>();
-      if (await userExists(username)) {
-        res.success = false;
+
+      string email = userDto.email;
+      string password = userDto.password;
+      string displayName = userDto.displayName;
+
+      if (email == null || password == null || displayName == null) {
+        res.code = 400;
+        res.message = "Missing required fields";
+        return res;
+      }
+      if (await userExists(email)) {
+        res.code = 409;
         res.message = "User already exists";
         return res;
       }
-      User user = new User(username: username);
+
+      User user = new User(email: email, displayName: displayName);
       createPasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
       user.passwordHash = passwordHash;
       user.passwordSalt = passwordSalt;
 
       await _context.Users.AddAsync(user);
       await _context.SaveChangesAsync();
-      res.data = user.id;
+
+      res.message = "success";
       return res;
     }
 
-    public async Task<ServiceResponse<string>> login(string username, string password) {
-      ServiceResponse<string> res = new ServiceResponse<string>();
-      User user = await _context.Users.FirstOrDefaultAsync(x => x.username.ToLower().Equals(username.ToLower()));
-      res.success = false;
-      res.message = "Incorrect credentials";
-      if (user != null) {
-        if (verifyPasswordHash(password, user.passwordHash, user.passwordSalt)) {
-          res.success = true;
-          res.message = "success";
-          res.data = createToken(user);
-        }
+    public async Task<ServiceResponse<UserDtoGet>> login(UserDtoLogin userDto) {
+
+      ServiceResponse<UserDtoGet> res = new ServiceResponse<UserDtoGet>();
+
+      string email = userDto.email;
+      string password = userDto.password;
+
+      if (email == null || password == null) {
+        res.code = 400;
+        res.message = "Missing required fields";
+        return res;
+      }
+
+      User user = await _context.Users.FirstOrDefaultAsync(x => x.email.ToLower().Equals(email.ToLower()));
+
+      if (user != null && verifyPasswordHash(password, user.passwordHash, user.passwordSalt)) {
+        UserDtoGet foundUser = _mapper.Map<UserDtoGet>(user);
+        foundUser.authToken = createToken(user);
+        res.data = foundUser;
+        res.code = 200;
+        res.message = "success";
+      } else {
+        res.code = 404;
+        res.message = "User not found";
       }
       return res;
     }
 
-    public async Task<bool> userExists(string username) {
-      if (await _context.Users.AnyAsync(x => x.username.ToLower() == username.ToLower())) {
+    public async Task<bool> userExists(string email) {
+      if (await _context.Users.AnyAsync(x => x.email.ToLower() == email.ToLower())) {
         return true;
       }
       return false;
@@ -83,7 +112,7 @@ namespace QuizFlow.Data {
     private string createToken(User user) {
       List<Claim> claims = new List<Claim> {
         new Claim(ClaimTypes.NameIdentifier, user.id.ToString()),
-        new Claim(ClaimTypes.Name, user.username)
+        new Claim(ClaimTypes.Name, user.email)
       };
       SymmetricSecurityKey key = new SymmetricSecurityKey(
         Encoding.UTF8.GetBytes(_configuation.GetSection("AppSettings:Token").Value)

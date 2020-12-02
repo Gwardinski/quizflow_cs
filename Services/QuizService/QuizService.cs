@@ -71,11 +71,11 @@ namespace QuizFlow.Services.QuizService {
           await _dbContext.SaveChangesAsync();
           serviceResponse.data = _mapper.Map<QuizDtoGet>(quiz);
         } else {
-          serviceResponse.success = false;
+          serviceResponse.code = 404;
           serviceResponse.message = "User quiz not found";
         }
       } catch (Exception e) {
-        serviceResponse.success = false;
+        serviceResponse.code = 400;
         serviceResponse.message = e.Message;
       }
       return serviceResponse;
@@ -88,13 +88,13 @@ namespace QuizFlow.Services.QuizService {
         if (quiz != null) {
           _dbContext.Quizzes.Remove(quiz);
           await _dbContext.SaveChangesAsync();
-          serviceResponse.data = "success";
+          serviceResponse.message = "success";
         } else {
-          serviceResponse.success = false;
+          serviceResponse.code = 404;
           serviceResponse.message = "User quiz not found";
         }
       } catch (Exception e) {
-        serviceResponse.success = false;
+        serviceResponse.code = 400;
         serviceResponse.message = e.Message;
       }
       return serviceResponse;

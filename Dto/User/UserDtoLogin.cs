@@ -1,6 +1,6 @@
 namespace QuizFlow.Dto.User {
   public class UserDtoLogin {
-    public string username { get; set; }
+    public string email { get; set; }
     public string password { get; set; }
   }
 }
